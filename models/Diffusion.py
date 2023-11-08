@@ -22,6 +22,7 @@ class Diffusion(L.LightningModule):
         ema_step_start=2000,
     ):
         super(Diffusion, self).__init__()
+        self.save_hyperparameters()
         self.t = timesteps
         self.cr = class_rate
         self.emb_channels = emb_channels
