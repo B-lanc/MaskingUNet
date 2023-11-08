@@ -69,7 +69,7 @@ class Diffusion(L.LightningModule):
     def on_fit_end(self):
         self.ema_model.update_model(self.model, self.global_step)
 
-    def sample(self, labels, n, cfg_scale=3, model=0):
+    def sample(self, timesteps, labels, n, cfg_scale=3, model=0):
         """
         n is only used when labels is None
         model is either 0, 1, or 2
@@ -83,11 +83,12 @@ class Diffusion(L.LightningModule):
             MODEL = self.ema_model
         with torch.no_grad():
             if labels is not None:
-                n = labels.shape[0]
+                n = len(labels)
+                labels = torch.Tensor([labels]).long().to(self.device)
             x = torch.randn((n, 3, 64, 64)).to(self.device)
             y = x if model == 2 else None
 
-            for i in reversed(range(1, self.t)):
+            for i in reversed(range(1, timesteps)):
                 timesteps = (torch.ones((n)) * i).long().to(self.device)
                 emb = self.emb(timesteps, labels)
 

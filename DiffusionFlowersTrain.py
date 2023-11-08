@@ -29,17 +29,19 @@ def main():
     ds = flowers_dataset(settings.flowers_dataset_dir, False)
     ds = FlowersDataset(ds)
     dataloader = DataLoader(
-        ds, batch_size=settings.batch_size, shuffle=True, num_workers=12,collate_fn=collate
+        ds,
+        batch_size=settings.batch_size,
+        shuffle=True,
+        num_workers=12,
+        collate_fn=collate,
     )
 
     trainer = L.Trainer(
-        accelerator="gpu",
-        max_epochs=100,
-        min_epochs=30,
-        default_root_dir=save_dir
+        accelerator="gpu", max_epochs=100, min_epochs=30, default_root_dir=save_dir
     )
 
     trainer.fit(model, dataloader)
+
 
 if __name__ == "__main__":
     main()

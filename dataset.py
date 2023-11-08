@@ -24,7 +24,7 @@ def flowers_dataset(path, partition=False):
     images = glob.glob(os.path.join(images, "*"))
     images.sort()
 
-    data = [(label-1, seg, img) for label, seg, img in zip(labels, segmim, images)]
+    data = [(label - 1, seg, img) for label, seg, img in zip(labels, segmim, images)]
 
     if partition:
         ids = os.path.join(path, "setid.mat")
@@ -59,7 +59,11 @@ class FlowersDataset(Dataset):
             ]
         )
         self.augment_transform = transforms.Compose(
-            [transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)]
+            [
+                transforms.ColorJitter(
+                    brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1
+                )
+            ]
         )
 
     def __len__(self):
@@ -77,6 +81,7 @@ class FlowersDataset(Dataset):
         if self.augment:
             img = self.augment_transform(img)
         return label, seg, img
+
 
 def collate(batch):
     labels = torch.stack([b[0] for b in batch])
