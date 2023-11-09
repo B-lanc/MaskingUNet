@@ -36,6 +36,7 @@ class UNet(nn.Module):
         pre = nn.ModuleList()
         for _ in range(depth):
             pre.append(nn.Conv2d(in_channels, channels[0], 3, 1, 1))
+            pre.append(nn.ReLU())
             in_channels = channels[0]
         pre.append(ATT(channels[0]))
         self.pre = nn.Sequential(*pre)

@@ -23,9 +23,9 @@ class DownConv(nn.Module):
         convs = []
         for _ in range(depth):
             convs.append(nn.Conv2d(in_channels, out_channels, 3, 1, 1))
-            convs.append(nn.Dropout(dropout))
             convs.append(nn.GroupNorm(gn_channels, out_channels))
             convs.append(nn.ReLU())
+            convs.append(nn.Dropout(dropout))
             in_channels = out_channels
         self.convs = nn.Sequential(*convs)
 
@@ -71,9 +71,9 @@ class UpConv(nn.Module):
         in_channels = out_channels * 2
         for _ in range(depth):
             convs.append(nn.Conv2d(in_channels, out_channels, 3, 1, 1))
-            convs.append(nn.Dropout(dropout))
             convs.append(nn.GroupNorm(gn_channels, out_channels))
             convs.append(nn.ReLU())
+            convs.append(nn.Dropout(dropout))
             in_channels = out_channels
         self.convs = nn.Sequential(*convs)
 
@@ -119,9 +119,9 @@ class MaskUpConv(nn.Module):
         convs = []
         for _ in range(depth):
             convs.append(nn.Conv2d(out_channels, out_channels, 3, 1, 1))
-            convs.append(nn.Dropout(dropout))
             convs.append(nn.GroupNorm(gn_channels, out_channels))
             convs.append(nn.ReLU())
+            convs.append(nn.Dropout(dropout))
         self.convs = nn.Sequential(*convs)
 
         if emb_channels is not None:
