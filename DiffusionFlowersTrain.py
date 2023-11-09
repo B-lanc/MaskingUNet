@@ -1,4 +1,5 @@
 import lightning as L
+from lightning.pytorch.callbacks import ModelCheckpoint
 from torch.utils.data import DataLoader
 import torch
 
@@ -10,7 +11,7 @@ import os
 
 
 def main():
-    TAG = "Testing"
+    TAG = "Testing3"
     MASKING = False
     NUM_CLASSES = 102
     model = Diffusion(
@@ -36,8 +37,25 @@ def main():
         collate_fn=collate,
     )
 
+    checkpoint_callback_last = ModelCheckpoint(
+        save_top_k=3,
+        monitor="step",
+        mode="max",
+        filename="last_check_{epoch:02d}",
+    )
+    checkpoint_callback_best = ModelCheckpoint(
+        save_top_k=3,
+        monitor="train_loss_epoch",
+        mode="min",
+        filename="best_check_{epoch:02d}",
+    )
+
     trainer = L.Trainer(
-        accelerator="gpu", max_epochs=100, min_epochs=30, default_root_dir=save_dir
+        accelerator="gpu",
+        max_epochs=500,
+        min_epochs=30,
+        default_root_dir=save_dir,
+        callbacks=[checkpoint_callback_last, checkpoint_callback_best],
     )
 
     trainer.fit(model, dataloader)
