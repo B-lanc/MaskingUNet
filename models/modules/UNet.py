@@ -17,6 +17,7 @@ class UNet(nn.Module):
         emb_channels=None,
         depth=2,
         Masking=False,
+        Attention=False,
     ):
         """
         in channels is the actual channel in, 3 for rgb
@@ -30,12 +31,13 @@ class UNet(nn.Module):
         self.emb_channels = emb_channels
 
         UP = MaskUpConv if Masking else UpConv
+        ATT = AttentionBlock if Attention else nn.Identity
 
         pre = nn.ModuleList()
         for _ in range(depth):
             pre.append(nn.Conv2d(in_channels, channels[0], 3, 1, 1))
             in_channels = channels[0]
-        pre.append(AttentionBlock(channels[0]))
+        pre.append(ATT(channels[0]))
         self.pre = nn.Sequential(*pre)
         self.post = nn.Conv2d(channels[0], out_channels, 3, 1, 1)
 
@@ -52,7 +54,7 @@ class UNet(nn.Module):
                     emb_channels=emb_channels,
                 )
             )
-            self.downatt.append(AttentionBlock(channels[i + 1]))
+            self.downatt.append(ATT(channels[i + 1]))
             self.up.append(
                 UP(
                     channels[-i - 1],
@@ -61,7 +63,7 @@ class UNet(nn.Module):
                     emb_channels=emb_channels,
                 )
             )
-            self.upatt.append(AttentionBlock(channels[-i - 2]))
+            self.upatt.append(ATT(channels[-i - 2]))
 
     def forward(self, x, emb=None):
         if self.emb_channels is None and emb is not None:
