@@ -17,7 +17,7 @@ class EMA(nn.Module):
             ema_w = ema_param.data
             orig_w = orig_param.data
 
-            ema_param.data = self.b * orig_w + (1 - self.b) * ema_w
+            ema_param.data = self.b * ema_w + (1 - self.b) * orig_w
 
     def forward(self, *args, **kwargs):
         return self.model(*args, **kwargs)
