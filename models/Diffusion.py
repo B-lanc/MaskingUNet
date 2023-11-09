@@ -20,6 +20,7 @@ class Diffusion(L.LightningModule):
         num_classes=None,
         ema_beta=0.99,
         ema_step_start=2000,
+        attention=False,
     ):
         super(Diffusion, self).__init__()
         self.save_hyperparameters()
@@ -27,7 +28,9 @@ class Diffusion(L.LightningModule):
         self.cr = class_rate
         self.emb_channels = emb_channels
 
-        self.model = UNet(3, 3, unet_channels, emb_channels, Masking=Masking)
+        self.model = UNet(
+            3, 3, unet_channels, emb_channels, Masking=Masking, Attention=attention
+        )
         self.ema_model = EMA(self.model, ema_beta, ema_step_start)
         self.sched = Scheduler(self.t)
 
