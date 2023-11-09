@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import lightning as L
+from torch.optim.optimizer import Optimizer
 
 from .modules.UNet import UNet
 from .modules.utils import sinusodial
@@ -70,7 +71,7 @@ class Diffusion(L.LightningModule):
         )
         return loss
 
-    def on_fit_end(self):
+    def on_before_zero_grad(self, optimizer: Optimizer):
         self.ema_model.update_model(self.model, self.global_step)
 
     def sample(self, timesteps, labels, n, cfg_scale=3, model=0):
