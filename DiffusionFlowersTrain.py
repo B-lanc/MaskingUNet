@@ -11,16 +11,17 @@ import os
 
 
 def main():
-    TAG = "Testing3"
+    TAG = "FlowerDiffusionNoMask"
     MASKING = False
     NUM_CLASSES = 102
     model = Diffusion(
         timesteps=1000,
-        class_rate=0.9,
+        class_rate=0.8,
         Masking=MASKING,
         unet_channels=settings.unet_channels,
         emb_channels=settings.emb_channels,
         num_classes=NUM_CLASSES,
+        attention=False,
     )
 
     save_dir = os.path.join(settings.save_dir, TAG)
@@ -28,7 +29,7 @@ def main():
         os.makedirs(save_dir)
 
     ds = flowers_dataset(settings.flowers_dataset_dir, False)
-    ds = FlowersDataset(ds)
+    ds = FlowersDataset(ds, image_size=settings.image_size, augment=True)
     dataloader = DataLoader(
         ds,
         batch_size=settings.batch_size,

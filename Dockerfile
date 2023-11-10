@@ -5,4 +5,5 @@ RUN apt update
 
 RUN pip install \
   lightning==2.0.9 \
-  scipy==1.11.2
+  scipy==1.11.2 \
+  pycocotools==2.0.7

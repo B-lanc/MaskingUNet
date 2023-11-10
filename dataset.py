@@ -2,11 +2,30 @@ import torch
 from torch.utils.data import Dataset
 from utils import load_image
 import torchvision.transforms as transforms
+from pycocotools.coco import COCO
 
+import numpy as np
 import scipy
 
 import os
 import glob
+
+
+def prep_transform(image_size):
+    return transforms.Compose(
+        [
+            transforms.Resize(image_size, antialias=True),
+            transforms.CenterCrop(image_size),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
+        ]
+    )
+
+
+def augment_transform():
+    return transforms.Compose(
+        [transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1)]
+    )
 
 
 def flowers_dataset(path, partition=False):
@@ -50,21 +69,8 @@ class FlowersDataset(Dataset):
         """
         self.data = data
         self.augment = augment
-        self.prep_transforms = transforms.Compose(
-            [
-                transforms.Resize(image_size, antialias=True),
-                transforms.CenterCrop(image_size),
-                transforms.RandomHorizontalFlip(p=0.5),
-                transforms.RandomVerticalFlip(p=0.5),
-            ]
-        )
-        self.augment_transform = transforms.Compose(
-            [
-                transforms.ColorJitter(
-                    brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1
-                )
-            ]
-        )
+        self.prep_transforms = prep_transform(image_size)
+        self.augment_transform = augment_transform()
 
     def __len__(self):
         return len(self.data)
@@ -81,6 +87,66 @@ class FlowersDataset(Dataset):
         if self.augment:
             img = self.augment_transform(img)
         return label, seg, img
+
+
+class CocoDataset(Dataset):
+    def __init__(self, path, partition="train", image_size=64, augment=False):
+        """
+        partition is either train or val
+        """
+        self.augment = augment
+        self.image_dir = os.path.join(path, f"{partition}2017")
+        annotation_file = os.path.join(
+            path, "annotations", f"instances_{partition}2017.json"
+        )
+
+        self.coco = COCO(annotation_file)
+
+        cats = self.coco.loadCats(self.coco.getCatIds())
+        self.id_to_index = {dicc["id"]: idx for idx, dicc in enumerate(cats)}
+        self.cats = {idx: dicc for idx, dicc in enumerate(cats)}
+        self.img_ids = self.coco.getImgIds()
+
+        self.prep_transforms = prep_transform(image_size)
+        self.augment_transform = augment_transform()
+
+    def __len__(self):
+        return len(self.img_ids)
+
+    def load_everything(self, img_idx):
+        img_meta = self.coco.loadImgs(img_idx)[0]
+        img = os.path.join(self.image_dir, img_meta["file_name"])
+        img = load_image(img)
+
+        n_classes = len(self.cats)
+        mask = np.zeros((n_classes, img.shape[1], img.shape[2]))
+        labels = [0] * n_classes
+
+        ann_id = self.coco.getAnnIds(imgIds=img_idx)
+        ann = self.coco.loadAnns(ann_id)
+
+        for i in ann:
+            idx = self.id_to_index[i["category_id"]]
+            curr_mask = self.coco.annToMask(i)
+            mask[idx] = np.maximum(mask[idx], curr_mask)
+            labels[idx] = 1
+
+        return labels, mask, img
+
+    def __getitem__(self, idx):
+        img_idx = self.img_ids[idx]
+        labels, seg, img = self.load_everything(img_idx)
+
+        labels = torch.Tensor(labels).long()
+        seg = torch.Tensor(seg)
+        img = torch.Tensor(img)
+        combined = torch.cat((img, seg), dim=0)
+        combined = self.prep_transforms(combined)
+        img, seg = combined[:3, :, :], combined[3:, :, :]
+
+        if self.augment:
+            img = self.augment_transform(img)
+        return labels, seg, img
 
 
 def collate(batch):
