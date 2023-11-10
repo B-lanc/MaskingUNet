@@ -155,3 +155,14 @@ class Scheduler(nn.Module):
             1 / torch.sqrt(a) * (x - ((1 - a) / (torch.sqrt(1 - a_h))) * predicted)
             + torch.sqrt(b) * noise
         ), noise
+
+
+class CocoDiffusion(Diffusion):
+    def emb(self, t, labels):
+        t_emb = sinusodial(t, self.emb_channels, self.device)
+        if self.class_emb is None or labels is None:
+            return t_emb
+
+        labels = labels[:, :, None]
+        c_emb = self.class_emb.weight * labels
+        return t_emb + c_emb
