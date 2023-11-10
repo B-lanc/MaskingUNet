@@ -165,4 +165,5 @@ class CocoDiffusion(Diffusion):
 
         labels = labels[:, :, None]
         c_emb = self.class_emb.weight * labels
+        c_emb = torch.sum(c_emb, dim=1)
         return t_emb + c_emb

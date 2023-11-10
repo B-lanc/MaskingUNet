@@ -3,7 +3,10 @@ import numpy as np
 
 
 def load_image(path):
-    return np.array(Image.open(path)).transpose(2, 0, 1) / 255
+    im = np.array(Image.open(path))
+    if len(im.shape) == 2:
+        im = np.stack([im, im, im], axis=2)
+    return im.transpose(2, 0, 1) / 255 
 
 
 def save_image(image, path):
