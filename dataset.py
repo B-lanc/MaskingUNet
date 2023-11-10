@@ -16,8 +16,6 @@ def prep_transform(image_size):
         [
             transforms.Resize(image_size, antialias=True),
             transforms.CenterCrop(image_size),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.5),
         ]
     )
 
