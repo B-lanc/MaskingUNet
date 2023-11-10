@@ -11,7 +11,6 @@ import os
 
 
 def main():
-    TAG = "FlowerDiffusionNoMask"
     MASKING = False
     NUM_CLASSES = 102
     model = Diffusion(
@@ -24,7 +23,7 @@ def main():
         attention=False,
     )
 
-    save_dir = os.path.join(settings.save_dir, TAG)
+    save_dir = os.path.join(settings.save_dir, settings.tag)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 

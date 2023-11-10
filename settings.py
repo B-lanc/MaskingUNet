@@ -1,3 +1,4 @@
+tag = "FlowerDiffusionNoMask"
 flowers_dataset_dir = "/datasets/102flowers"
 save_dir = "/saves"
 
@@ -6,5 +7,5 @@ device = "cuda"
 
 image_size = 64
 
-unet_channels = [32, 64, 128, 256, 512]
+unet_channels = [64, 128, 256, 512]
 emb_channels = 256
