@@ -89,7 +89,9 @@ class Diffusion(L.LightningModule):
         with torch.no_grad():
             if labels is not None:
                 n = len(labels)
-                labels = torch.Tensor([labels]).long().to(self.device)
+                if type(labels) == int:
+                    labels = [labels]
+                labels = torch.Tensor(labels).long().to(self.device)
             x = torch.randn((n, 3, 64, 64)).to(self.device)
             y = x if model == 2 else None
 

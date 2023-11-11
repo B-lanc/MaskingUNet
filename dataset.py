@@ -147,6 +147,7 @@ class CocoDataset(Dataset):
             img = self.augment_transform(img)
         return labels, seg, img
 
+
 class CocoDatasetHdf(Dataset):
     def __init__(self, path, partition="train", image_size=64, augment=False):
         """
@@ -159,7 +160,7 @@ class CocoDatasetHdf(Dataset):
 
         with h5py.File(self.hdf, "r") as f:
             self.length = len(f["labels"])
-    
+
     def __getitem__(self, idx):
         with h5py.File(self.hdf, "r") as f:
             labels = f["labels"][f"{idx}"][:]
@@ -173,11 +174,8 @@ class CocoDatasetHdf(Dataset):
             images = self.augment_transform(images)
         return labels, masks, images
 
-
     def __len__(self):
         return self.length
-
-
 
 
 def collate(batch):

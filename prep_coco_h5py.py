@@ -15,8 +15,8 @@ coco_hdf = os.path.join(settings.coco_dataset_dir, "hdf")
 if not os.path.exists(coco_hdf):
     os.makedirs(coco_hdf)
 
-train_name = f"coco_train_{settings.image_size}.hdf5"
-val_name = f"coco_val_{settings.image_size}.hdf5"
+train_name = f"train_{settings.image_size}.hdf5"
+val_name = f"val_{settings.image_size}.hdf5"
 
 train_path = os.path.join(coco_hdf, train_name)
 val_path = os.path.join(coco_hdf, val_name)

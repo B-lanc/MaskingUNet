@@ -1,6 +1,6 @@
 import torch
 
-from models.Diffusion import Diffusion
+from models.Diffusion import Diffusion, CocoDiffusion
 import settings
 from utils import save_image
 
@@ -8,7 +8,14 @@ import os
 
 
 def main():
-    labels = [i for i in range(64)]
+    DATASET = "coco"
+    MODEL = CocoDiffusion if DATASET == "coco" else Diffusion
+    if DATASET == "coco":
+        labels = [[0 for _ in range(80)] for _ in range(64)]
+        for idx, label in enumerate(labels):
+            label[idx] = 1
+    else:
+        labels = [i for i in range(64)]
     checkpoint_dir = os.path.join(
         settings.save_dir,
         settings.tag,
@@ -19,7 +26,7 @@ def main():
     )
 
     model = (
-        Diffusion.load_from_checkpoint(
+        MODEL.load_from_checkpoint(
             checkpoint_dir,
         )
         .to(settings.device)
