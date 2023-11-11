@@ -4,6 +4,7 @@ from utils import load_image
 import torchvision.transforms as transforms
 from pycocotools.coco import COCO
 
+import h5py
 import numpy as np
 import scipy
 
@@ -145,6 +146,38 @@ class CocoDataset(Dataset):
         if self.augment:
             img = self.augment_transform(img)
         return labels, seg, img
+
+class CocoDatasetHdf(Dataset):
+    def __init__(self, path, partition="train", image_size=64, augment=False):
+        """
+        partition is either train or val
+        """
+        self.augment = augment
+        self.hdf = os.path.join(path, "hdf", f"coco_{partition}_{image_size}.hdf5")
+
+        self.augment_transform = augment_transform()
+
+        with h5py.File(self.hdf, "r") as f:
+            self.length = len(f["labels"])
+    
+    def __getitem__(self, idx):
+        with h5py.File(self.hdf, "r") as f:
+            labels = f["labels"][f"{idx}"][:]
+            masks = f["masks"][f"{idx}"][:]
+            images = f["images"][f"{idx}"][:]
+
+        labels = torch.Tensor(labels).long()
+        masks = torch.Tensor(masks)
+        images = torch.Tensor(images)
+        if self.augment:
+            images = self.augment_transform(images)
+        return labels, masks, images
+
+
+    def __len__(self):
+        return self.length
+
+
 
 
 def collate(batch):

@@ -3,7 +3,7 @@ from lightning.pytorch.callbacks import ModelCheckpoint
 from torch.utils.data import DataLoader
 import torch
 
-from dataset import collate, CocoDataset
+from dataset import collate, CocoDataset, CocoDatasetHdf
 from models.Diffusion import CocoDiffusion
 import settings
 
@@ -27,8 +27,9 @@ def main():
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
-    ds = CocoDataset(
-        settings.coco_dataset_dir, "train", settings.image_size, augment=False
+    # ds = CocoDataset(
+    ds = CocoDatasetHdf(
+        settings.coco_dataset_dir, "train", settings.image_size, augment=True
     )
     dataloader = DataLoader(
         ds,

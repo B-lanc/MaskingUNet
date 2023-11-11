@@ -6,4 +6,5 @@ RUN apt update
 RUN pip install \
   lightning==2.0.9 \
   scipy==1.11.2 \
-  pycocotools==2.0.7
+  pycocotools==2.0.7 \
+  h5py==3.10.0
