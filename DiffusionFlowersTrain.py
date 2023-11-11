@@ -11,7 +11,7 @@ import os
 
 
 def main():
-    MASKING = False
+    MASKING = True
     NUM_CLASSES = 102
     model = Diffusion(
         timesteps=1000,

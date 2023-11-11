@@ -22,7 +22,7 @@ def main():
         "lightning_logs",
         "version_0",
         "checkpoints",
-        "last_check_epoch=499.ckpt",
+        "last_check_epoch=29.ckpt",
     )
 
     model = (

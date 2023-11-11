@@ -4,23 +4,22 @@ from torch.utils.data import DataLoader
 import torch
 
 from dataset import collate, CocoDataset, CocoDatasetHdf
-from models.Diffusion import CocoDiffusion
+from models.Segmentation import Segmentation
 import settings
 
 import os
 
 
 def main():
-    MASKING = True
-    NUM_CLASSES = 80
-    model = CocoDiffusion(
-        timesteps=1000,
-        class_rate=0.8,
+    MASKING = False
+    out_channels = 80
+    model = Segmentation(
+        3,
+        out_channels,
+        settings.unet_channels,
+        depth=2,
         Masking=MASKING,
-        unet_channels=settings.unet_channels,
-        emb_channels=settings.emb_channels,
-        num_classes=NUM_CLASSES,
-        attention=False,
+        Attention=False,
     )
 
     save_dir = os.path.join(settings.save_dir, settings.tag)
@@ -28,11 +27,21 @@ def main():
         os.makedirs(save_dir)
 
     # ds = CocoDataset(
-    ds = CocoDatasetHdf(
+    train_ds = CocoDatasetHdf(
         settings.coco_dataset_dir, "train", settings.image_size, augment=True
     )
-    dataloader = DataLoader(
-        ds,
+    val_ds = CocoDatasetHdf(
+        settings.coco_dataset_dir, "val", settings.image_size, augment=False
+    )
+    train_dataloader = DataLoader(
+        train_ds,
+        batch_size=settings.batch_size,
+        shuffle=False,
+        num_workers=12,
+        collate_fn=collate,
+    )
+    val_dataloader = DataLoader(
+        val_ds,
         batch_size=settings.batch_size,
         shuffle=False,
         num_workers=12,
@@ -47,7 +56,7 @@ def main():
     )
     checkpoint_callback_best = ModelCheckpoint(
         save_top_k=3,
-        monitor="train_loss_epoch",
+        monitor="val_loss",
         mode="min",
         filename="best_check_{epoch:02d}",
     )
@@ -60,7 +69,9 @@ def main():
         callbacks=[checkpoint_callback_last, checkpoint_callback_best],
     )
 
-    trainer.fit(model, dataloader)
+    trainer.fit(
+        model, train_dataloaders=train_dataloader, val_dataloaders=val_dataloader
+    )
 
 
 if __name__ == "__main__":
